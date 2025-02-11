@@ -2,7 +2,7 @@ import toast from 'react-hot-toast';
 import dataJSON from '../../public/data.json';
 
 
-const createToast=(title: string, msg: string, type: number)=>{toast.custom((t) => (
+const createToast=(title: string, msg: string, type: string)=>{toast.custom((t) => (
   
     <div
       className={`${
