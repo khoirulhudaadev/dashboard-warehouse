@@ -1,11 +1,56 @@
+import { clearDeliveries } from '@stores/delivery/deliverySlice';
+import { clearItems } from '@stores/item/itemSlice';
+import { clearRoles } from '@stores/role/roleSlice';
+import { clearTypes } from '@stores/type/typeSlice';
+import { clearUnits } from '@stores/unit/unitSlice';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Avatar from 'react-avatar';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import { RootState } from '../../stores';
+import { clearUser } from '../../stores/auth/authSlice';
+import { AppDispatch } from '../../stores/store';
 import ClickOutside from '../ClickOutside';
-import UserOne from '../../images/user/user-01.png';
 
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
+  const dispatch = useDispatch<AppDispatch>()
+  const navigate = useNavigate()
+
+  const logOut = () => {
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Anda akan keluar dari akun ini.",
+        icon: 'question',
+        showCancelButton: true, // Menampilkan tombol Cancel
+        confirmButtonText: 'Keluar',
+        cancelButtonText: 'Batalkan',
+        customClass: {
+          cancelButton: "!bg-blue-500 !!w-max !px-4 !overflow-hidden",
+          confirmButton: "!bg-slate-300 !text-slate-500 !px-4",
+        },
+        reverseButtons: true, // Agar urutan tombol Ya dan Tidak berbalik
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // Jika klik "Ya", clear user data dan redirect ke homepage
+          dispatch(clearUser());
+          dispatch(clearItems());
+          dispatch(clearUnits());
+          dispatch(clearTypes());
+          dispatch(clearRoles());
+          dispatch(clearDeliveries());
+          navigate('/');
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          // Jika klik "Tidak" atau tombol Cancel
+          console.log('Anda batal keluar');
+        }
+      });
+  };
+
+  const user = useSelector((state: RootState) => state?.auth?.auth)
+  console.log(user)
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <Link
@@ -15,14 +60,12 @@ const DropdownUser = () => {
       >
         <span className="hidden text-right lg:block">
           <span className="block text-sm font-medium text-black dark:text-white">
-            Thomas Anree
+            {user?.username}
           </span>
-          <span className="block text-xs">UX Designer</span>
+          <span className="block text-xs">{user?.role?.role_name}</span>
         </span>
 
-        <span className="h-12 w-12 rounded-full">
-          <img src={UserOne} alt="User" />
-        </span>
+        <Avatar name={user?.username} size="34" round={true} />
 
         <svg
           className="hidden fill-current sm:block"
@@ -119,7 +162,7 @@ const DropdownUser = () => {
               </Link>
             </li> */}
           </ul>
-          <button className="bg-red-600 text-white flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
+          <button onClick={() => logOut()} className="bg-red-600 text-white flex items-center gap-3.5 px-6 py-4 text-sm font-medium duration-300 ease-in-out hover:text-primary lg:text-base">
             <svg
               className="fill-current"
               width="22"

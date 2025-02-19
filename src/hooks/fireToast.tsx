@@ -73,7 +73,7 @@ if (alertSettings){
     const value=isNaN(parseFloat(alertSetting.value))?alertSetting.value:parseFloat(alertSetting.value);
     const para=alertSetting.criterion<2?"delta_"+alertSetting.para:alertSetting.para;
     if (alertSetting.id=="ALL"){
-      Object.keys(dataJSON).map((id:string)=>
+      Object.keys(dataJSON: any).map((id:string)=>
       {
         const condition=alertSetting.criterion=='0'?value<=-1*dataJSON[id][para]:
         alertSetting.criterion=='1'||alertSetting.criterion=='3'?value>=dataJSON[id][para]:

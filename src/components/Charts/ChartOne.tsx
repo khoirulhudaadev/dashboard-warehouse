@@ -1,6 +1,7 @@
 import { ApexOptions } from 'apexcharts';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
+import { ChartType } from 'types/component';
 
 const options: ApexOptions = {
   legend: {
@@ -8,7 +9,7 @@ const options: ApexOptions = {
     position: 'top',
     horizontalAlign: 'left',
   },
-  colors: ['#3C50E0', '#80CAEE'],
+  colors: ['#F56565', '#48BB78'],
   chart: {
     fontFamily: 'Satoshi, sans-serif',
     height: 335,
@@ -48,10 +49,6 @@ const options: ApexOptions = {
     width: [2, 2],
     curve: 'straight',
   },
-  // labels: {
-  //   show: false,
-  //   position: "top",
-  // },
   grid: {
     xaxis: {
       lines: {
@@ -70,7 +67,7 @@ const options: ApexOptions = {
   markers: {
     size: 4,
     colors: '#fff',
-    strokeColors: ['#3056D3', '#80CAEE'],
+    strokeColors: ['#F56565', '#48BB78'],
     strokeWidth: 3,
     strokeOpacity: 0.9,
     strokeDashArray: 0,
@@ -84,24 +81,13 @@ const options: ApexOptions = {
   xaxis: {
     type: 'category',
     categories: [
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'
     ],
     axisBorder: {
-      show: false,
+      show: true,
     },
     axisTicks: {
-      show: false,
+      show: true,
     },
   },
   yaxis: {
@@ -111,38 +97,80 @@ const options: ApexOptions = {
       },
     },
     min: 0,
-    max: 100,
+    max: 500,
   },
 };
 
 interface ChartOneState {
   series: {
     name: string;
-    data: number[];
+    data: any;
   }[];
 }
 
-const ChartOne: React.FC = () => {
-  const [state, setState] = useState<ChartOneState>({
+const ChartOne = ({ dataIn, dataOut }: ChartType) => {
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'
+  ];
+
+  // Group and sum 'amount' by month-year for 'dataIn'
+  const groupedInByMonth = dataIn?.reduce((result: any, item: any) => {
+    const date = new Date(item.created_at);
+    const monthYear: any = `${date.getMonth() + 1}-${date.getFullYear()}`;
+    
+    if (!result[monthYear]) {
+      result[monthYear] = 0; // Set initial value to 0 if month not yet encountered
+    }
+
+    result[monthYear] += item.amount; // Sum amounts for the same month-year
+    
+    return result;
+  }, {});
+
+  // Ensure that totalAmountsIn matches months from Jan to Dec
+  const totalAmountsIn = months.map((_: any, index: number) => {
+    const monthIndex = index + 1; // Month index (1-12)
+    const matchingMonth = Object.keys(groupedInByMonth).find((key) =>
+      key.startsWith(`${monthIndex}`) // Match by month number
+    );
+    return matchingMonth ? groupedInByMonth[matchingMonth] : 0; // Use 0 if no data for this month
+  });
+
+  // Group and sum 'amount' by month-year for 'dataOut'
+  const groupedOutByMonth = dataOut?.reduce((result: any, item: any) => {
+    const date = new Date(item.created_at);
+    const monthYear: any = `${date.getMonth() + 1}-${date.getFullYear()}`;
+    
+    if (!result[monthYear]) {
+      result[monthYear] = 0; // Set initial value to 0 if month not yet encountered
+    }
+
+    result[monthYear] += item.amount; // Sum amounts for the same month-year
+    
+    return result;
+  }, {});
+
+  // Ensure that totalAmountsOut matches months from Jan to Dec
+  const totalAmountsOut = months.map((_: any, index: number) => {
+    const monthIndex = index + 1; // Month index (1-12)
+    const matchingMonth = Object.keys(groupedOutByMonth).find((key) =>
+      key.startsWith(`${monthIndex}`) // Match by month number
+    );
+    return matchingMonth ? groupedOutByMonth[matchingMonth] : 0; // Use 0 if no data for this month
+  });
+
+  const [state] = useState<ChartOneState>({
     series: [
       {
-        name: 'Product One',
-        data: [23, 11, 22, 27, 13, 22, 37, 21, 44, 22, 30, 45],
+        name: 'Barang masuk',
+        data: totalAmountsIn,
       },
-
       {
-        name: 'Product Two',
-        data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39, 51],
+        name: 'Barang keluar',
+        data: totalAmountsOut,
       },
     ],
   });
-
-  const handleReset = () => {
-    setState((prevState) => ({
-      ...prevState,
-    }));
-  };
-  handleReset;
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
@@ -150,34 +178,21 @@ const ChartOne: React.FC = () => {
         <div className="flex w-full flex-wrap gap-3 sm:gap-5">
           <div className="flex min-w-47.5">
             <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-primary">
-              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-primary"></span>
+              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-[#F56565]"></span>
             </span>
             <div className="w-full">
-              <p className="font-semibold text-primary">Total Revenue</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
+              <p className="font-semibold text-[#F56565]">Barang masuk</p>
+              <p className="text-sm font-medium">Jan - Des `{new Date().getFullYear()}`</p>
             </div>
           </div>
           <div className="flex min-w-47.5">
             <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-secondary">
-              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
+              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-[#48BB78]"></span>
             </span>
             <div className="w-full">
-              <p className="font-semibold text-secondary">Total Sales</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
+              <p className="font-semibold text-[#48BB78]">Barang keluar</p>
+              <p className="text-sm font-medium">Jan - Des `{new Date().getFullYear()}`</p>
             </div>
-          </div>
-        </div>
-        <div className="flex w-full max-w-45 justify-end">
-          <div className="inline-flex items-center rounded-md bg-whiter p-1.5 dark:bg-meta-4">
-            <button className="rounded bg-white py-1 px-3 text-xs font-medium text-black shadow-card hover:bg-white hover:shadow-card dark:bg-boxdark dark:text-white dark:hover:bg-boxdark">
-              Day
-            </button>
-            <button className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark">
-              Week
-            </button>
-            <button className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark">
-              Month
-            </button>
           </div>
         </div>
       </div>

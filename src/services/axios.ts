@@ -1,12 +1,11 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { base_url } from './urls';
 import store from '../stores/store';
-
-// const navigate = useNavigate()
+import { base_url } from './urls';
 
 // Define an interfaces
 interface ErrorResponseData {
 	message?: string;
+	status?: number | undefined
 }
 
 const api = axios.create({
@@ -52,10 +51,9 @@ api.interceptors.response.use(
 		return response;
 	},
 	function (error: AxiosError<ErrorResponseData>): Promise<never> {
-		const responseData = error.response?.data;
-
-		if (responseData?.message === 'Unauthenticated.') {
-			window.location.pathname = '/login';
+		console.log('error:', error)
+		if (error?.message === "Request failed with status code 401" || [401, 402].includes(error?.status ?? 0)) {
+			window.location.pathname = '/';
 		} 
 
 		return Promise.reject(error);

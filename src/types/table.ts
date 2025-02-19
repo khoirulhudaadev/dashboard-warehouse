@@ -1,5 +1,8 @@
 export type DynamicTableProps = {
-    title: string;
+    title?: string;
     columns?: string[];
-    data?: string[] | number[];
+    data?: any[];
+    onDelete?: (e: string) => void,
+    onUpdate?: (e: string, body: any) => void,
+    onRestore?: (body: any) => void,
 }

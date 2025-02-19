@@ -1,21 +1,30 @@
 import { useEffect, useState } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
+import AddItem from '@pages/Create/AddItem';
+import AddType from '@pages/Create/AddType';
+import AddUnit from '@pages/Create/AddUnit';
+import Delivery from '@pages/Delivery';
+import FormElements from '@pages/Form/FormElements';
+import FormLayout from '@pages/Form/FormLayout';
+import Item from '@pages/Item';
+import UpdateType from '@pages/Update/UpdateType';
+import UpdateUnit from '@pages/Update/UpdateUnit';
+import UpdateUser from '@pages/Update/UpdateUser';
 import Loader from './common/Loader';
 import PageTitle from './components/PageTitle';
 import DefaultLayout from './layout/DefaultLayout';
+import ForgotPassword from './pages/Authentication/ForgotPassword';
+import ResetPassword from './pages/Authentication/ResetPassword';
+import SignIn from './pages/Authentication/SignIn';
+import AddUser from './pages/Create/AddUser';
 import Homepage from './pages/Homepage';
-import Incoming from './pages/Incoming';
-import Outgoing from './pages/Outgoing';
 import Profile from './pages/Profile';
+import Success from './pages/Result/Success';
 import Type from './pages/Type';
-import Alerts from './pages/UiElements/Alerts';
-import Buttons from './pages/UiElements/Buttons';
 import Unit from './pages/Unit';
 import User from './pages/User';
-import SignUp from './pages/Authentication/SignUp';
-import SignIn from './pages/Authentication/SignIn';
-import ResetPassword from './pages/Authentication/ResetPassword';
+import Chart from '@pages/Chart';
 
 function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -33,16 +42,8 @@ function App() {
     <Loader />
   ) : (
     <Routes>
-      {/* <Route
-        // index
-        path='/daftar'
-        element={
-          <DefaultLayout useLayout={false}>
-            <PageTitle title="Daftar" />
-            <SignUp />
-          </DefaultLayout>
-        }
-      /> */}
+
+      {/* ============================  MAINS  =============================== */}
       <Route
         // index
         path='/'
@@ -55,11 +56,31 @@ function App() {
       />
       <Route
         // index
+        path='/forgot-password'
+        element={
+          <DefaultLayout useLayout={false}>
+            <PageTitle title="Kirim pesan email" />
+            <ForgotPassword />
+          </DefaultLayout>
+        }
+      />
+      <Route
+        // index
         path='/reset-password'
         element={
           <DefaultLayout useLayout={false}>
             <PageTitle title="Reset kata sandi" />
             <ResetPassword />
+          </DefaultLayout>
+        }
+      />
+      <Route
+        // index
+        path='/sukses'
+        element={
+          <DefaultLayout useLayout={false}>
+            <PageTitle title="Berhasil kirim permintaan" />
+            <Success />
           </DefaultLayout>
         }
       />
@@ -83,11 +104,11 @@ function App() {
         }
       />
       <Route
-        path="/barang-masuk"
+        path="/data-barang"
         element={
           <DefaultLayout useLayout={true}>
             <PageTitle title="Barang masuk" />
-            <Incoming />
+            <Item />
           </DefaultLayout>
         }
       />
@@ -96,7 +117,7 @@ function App() {
         element={
           <DefaultLayout useLayout={true}>
             <PageTitle title="Barang keluar" />
-            <Outgoing />
+            <Delivery />
           </DefaultLayout>
         }
       />
@@ -127,7 +148,107 @@ function App() {
           </DefaultLayout>
         }
       />
-        <Route
+
+
+      {/* ============================  CREATES  =============================== */}
+      <Route
+        path="/tambah-pengguna"
+        element={
+          <DefaultLayout useLayout={true}>
+            <PageTitle title="Tambah pengguna baru" />
+            <AddUser />
+          </DefaultLayout>
+        }
+      />
+      <Route
+        path="/tambah-satuan"
+        element={
+          <DefaultLayout useLayout={true}>
+            <PageTitle title="Tambah satuan baru" />
+            <AddUnit />
+          </DefaultLayout>
+        }
+      />
+      <Route
+        path="/tambah-jenis"
+        element={
+          <DefaultLayout useLayout={true}>
+            <PageTitle title="Tambah jenis baru" />
+            <AddType />
+          </DefaultLayout>
+        }
+      />
+      <Route
+        path="/tambah-barang"
+        element={
+          <DefaultLayout useLayout={true}>
+            <PageTitle title="Masukan barang baru" />
+            <AddItem />
+          </DefaultLayout>
+        }
+      />
+
+      {/* =============================  UPDATES  ============================== */}
+      <Route
+        path="/perbarui-data-pengguna/:id"
+        element={
+          <DefaultLayout useLayout={true}>
+            <PageTitle title="Perbarui data pengguna" />
+            <UpdateUser />
+          </DefaultLayout>
+        }
+      />
+      <Route
+        path="/perbarui-data-satuan/:id"
+        element={
+          <DefaultLayout useLayout={true}>
+            <PageTitle title="Perbarui data satuan" />
+            <UpdateUnit />
+          </DefaultLayout>
+        }
+      />
+      <Route
+        path="/perbarui-data-jenis/:id"
+        element={
+          <DefaultLayout useLayout={true}>
+            <PageTitle title="Perbarui data jenis" />
+            <UpdateType />
+          </DefaultLayout>
+        }
+      />
+
+
+      <Route
+        path="/forms/form-elements"
+        element={
+        <DefaultLayout useLayout={true}>
+            <PageTitle title="Form Elements | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+            <FormElements />
+          </DefaultLayout>  
+        }
+      />
+      <Route
+        path="/forms/form-layout"
+        element={
+        <DefaultLayout useLayout={true}>
+            <PageTitle title="Form Layout | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+            <FormLayout />
+          </DefaultLayout>  
+        }
+      />
+
+<Route
+        path="/chart"
+        element={
+        <DefaultLayout useLayout={true}>
+            <PageTitle title="Basic Chart | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+            <Chart />
+          </DefaultLayout>  
+        }
+      />
+
+      {/* =============================  OTHERS  ============================== */}
+      {/* <Route
         path="/ui/alerts"
         element={
           <DefaultLayout useLayout={true}>
@@ -135,7 +256,7 @@ function App() {
             <Alerts />
           </DefaultLayout>
         }
-      />
+      /> */}
       {/* <Route
         path="/ui/buttons"
         element={

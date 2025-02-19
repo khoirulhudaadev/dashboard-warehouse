@@ -1,22 +1,23 @@
+import { FormikHelpers, useFormik } from 'formik';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import * as Yup from 'yup';
 import Swal from 'sweetalert2';
-import { useFormik, FormikHelpers } from 'formik';
-import { AppDispatch } from '../../stores/store';
-import { storeUser, storeToken } from '../../stores/auth/authSlice';
+import * as Yup from 'yup';
 import * as endpoints from '../../services/endpoints';
-import { authType } from '../../types/auth';
+import { storeToken, storeUser } from '../../stores/auth/authSlice';
+import { AppDispatch } from '../../stores/store';
+import { AuthResponse, authType } from '../../types/auth';
 
 // Define the type for hook parameters
 interface UseLoginFormikProps {
 	onError?: (message: string) => void;
+	onResponse: () => void;
 }
 
 // Define the type for the formik hook return value
 type UseLoginFormikReturn = ReturnType<typeof useFormik<authType>>;
 
-export const useLoginFormik = ({ onError }: UseLoginFormikProps): UseLoginFormikReturn => {
+export const useLoginFormik = ({ onError, onResponse }: UseLoginFormikProps): UseLoginFormikReturn => {
 	const dispatch = useDispatch<AppDispatch>();
 	const navigate = useNavigate();
 
@@ -28,23 +29,25 @@ export const useLoginFormik = ({ onError }: UseLoginFormikProps): UseLoginFormik
 		}),
 		onSubmit: async (values: authType, { resetForm } : FormikHelpers<authType>) => {
 			try {
-				const { data } = await endpoints.auth.login(values);
+
+				const { data }:{ data: AuthResponse, status: number } = await endpoints.auth.login(values);
 
                 console.log('data', data)
+                // console.log('status', status)
 
-				if (Number(data?.status) === 200 && (typeof data === 'object' && data !== null)) {
+				if (Number(data?.statusCode) === 200 && (typeof data?.data === 'object' && data !== null)) {
 					// Store
 					dispatch(storeUser(data.data?.user));
 					dispatch(storeToken(data.data?.token));
-
+					onResponse()
 					// Clear form and navigate to index
 					resetForm(); 
-                    navigate('/');
+                    navigate('/halaman-utama');
 
 					// Notifications
 					Swal.fire({
 						icon: 'success',
-						title: "Logged In",
+						title: "Masuk",
 						html: `Selamat datang kembali, <span class="font-600">${data?.data?.user?.username}</span>`,
 						showCancelButton: false,
 						showConfirmButton: false,
@@ -60,10 +63,13 @@ export const useLoginFormik = ({ onError }: UseLoginFormikProps): UseLoginFormik
 					});
 				} else {
 					// Notifications
+					if(onError) {
+						onError('Terjadi kesalahan saat masuk!')
+					}
 					Swal.fire({
-						icon: 'warning',
-						title: "Masuk",
-						html: 'Terjadi kesalahan, silahkan coba kembali beberapa saat',
+						icon: 'error',
+						title: "Upsss!",
+						html: 'Terjadi kesalahan saat masuk!',
 						showCancelButton: false,
 						showConfirmButton: false,
 						customClass: {
@@ -77,8 +83,26 @@ export const useLoginFormik = ({ onError }: UseLoginFormikProps): UseLoginFormik
 						timerProgressBar: true,
 					});
 				}
-			} catch (error: unknown) {
+			} catch (error: any) {
 				console.error('Login Error: ', error);
+				if(error.status === 429 || error.response.data.message === "Too Many Attempts.") {
+					Swal.fire({
+						icon: 'error',
+						title: "Upsss!",
+						html: 'Terlalu banyak percobaan, tunggu beberapa saat untuk coba lagi.',
+						showCancelButton: false,
+						showConfirmButton: false,
+						customClass: {
+							popup: "!rounded-[12px] !bg-white !w-[30rem] !py-[2rem] !overflow-hidden",
+							icon: "!mt-0",
+							title: "!pt-[5px] !text-size-md font-700",
+							htmlContainer: "!pt-[5px] !pb-[1rem] !my-0",
+							timerProgressBar: "!bg-Neutrals-300",
+						},
+						timer: 2000,
+						timerProgressBar: true,
+					});
+				}
 				if (onError) {
 					onError('Terjadi kesalahan, silahkan coba kembali beberapa saat');
 				}

@@ -1,8 +1,33 @@
-import { ArrowLeft02Icon, InboxCheckIcon } from 'hugeicons-react';
-import React from 'react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft02Icon, InboxCheckIcon, Loading03Icon, ViewIcon, ViewOffIcon } from 'hugeicons-react';
+import React, { useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import Error from '../../components/ErrorMessage';
+import useResetFormik from '../../hooks/Auth/useResetPassword';
 
 const ResetPassword: React.FC = () => {
+
+  const [error, setError] = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const email = params.get('email');
+  const token = params.get('token');
+
+  console.log(email, token);
+
+  const handleSetError = (e: string) => {
+    setError(e)
+  }
+
+  const useReset = useResetFormik({
+    onError: (e:string) => handleSetError(e),
+    onResponse: () => {setError(''), setLoading(false)},
+    email: email ?? '-',
+    token: token ?? '-'
+  });
+
   return (
     <>
       <div className="w-screen h-screen rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
@@ -15,8 +40,6 @@ const ResetPassword: React.FC = () => {
                 <div className='flex items-center gap-4'>
                   <h2 className='font-semibold text-[40px] mb-2'>Warehouse</h2>
                 </div>
-                {/* <img className="hidden dark:block" src={Logo} alt="Logo" />
-                <img className="dark:hidden" src={LogoDark} alt="Logo" /> */}
               </Link>
 
               <InboxCheckIcon className='w-50 h-50 mt-10' />
@@ -26,19 +49,17 @@ const ResetPassword: React.FC = () => {
           {/* Menu kanan */}
           <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
             <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
-              
               <Link to={'/'}>
                 <div className='w-max flex items-center mb-7 text-blue-500 gap-3'>
                     <ArrowLeft02Icon />
                     <p>Kembali</p>
                 </div>
-              </Link>
-
+              </Link>              
               <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
                 Perbarui kata sandi
               </h2>
 
-              <form>
+              <form onSubmit={useReset.handleSubmit}>
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
                     Akun email
@@ -46,8 +67,10 @@ const ResetPassword: React.FC = () => {
                   <div className="relative">
                     <input
                       type="email"
-                      placeholder="xxxx@gmail.com"
-                      className="w-full rounded-lg border border-stroke bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary"
+                      disabled={true}   
+                      name='email'
+                      value={email ?? '-'}
+                      className={`w-full rounded-lg border border-stroke bg-slate-100 py-4 pl-6 pr-10 text-slate-400 outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
                     />
 
                     <span className="absolute right-4 top-4">
@@ -70,13 +93,57 @@ const ResetPassword: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="mb-5">
-                  <input
-                    type="submit"
-                    value="Kirim sekarang"
-                    className="w-full cursor-pointer rounded-lg border border-blue-600 bg-blue-600 p-4 text-white transition hover:bg-opacity-90"
-                  />
+                <div className="mb-6">
+                  <label className="mb-2.5 block font-medium text-black dark:text-white">
+                    Kata sandi baru
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name='password'
+                      value={useReset.values.password}
+                      onBlur={useReset.handleBlur}
+                      onChange={useReset.handleChange}
+                      placeholder="**********"
+                      className={`w-full rounded-lg border ${useReset.touched.password && useReset.errors.password ? 'border-red-500' : 'border-stroke'} bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+                    />
+
+                    {
+                      useReset.touched.password && useReset.errors.password && (
+                        <p className="text-red-500 text-sm mt-1">{'Masukan password yang sesuai!'}</p>
+                      )
+                    }
+
+                    <span className="absolute text-slate-400 right-4 top-4">
+                      {
+                        showPassword ? (
+                          <ViewIcon onClick={() => setShowPassword(false)} />
+                        ):
+                          <ViewOffIcon onClick={() => setShowPassword(true)}  />
+                      }
+                    </span>
+                  </div>
                 </div>
+
+                <div className="mb-5">
+                  <button
+                    type="submit" // Make sure it is "submit" to trigger form submission
+                    className={`w-full p-4 flex justify-center items-center rounded-lg border ${
+                      loading
+                        ? 'order-slate-400 bg-slate-100 text-slate-400 cursor-not-allowed'
+                        : 'border-blue-600 bg-blue-600 text-white transition hover:bg-opacity-90 cursor-pointer'
+                    }`}
+                  >
+                    <p>Perbarui sekarang</p>
+                    {loading && (
+                      <Loading03Icon className="relative top-[1px] ml-4 animate animate-spin duration-200" />
+                    )}
+                  </button>
+                </div>
+
+                {
+                  error ? <Error type='input-error' text={'Email atau password salah!'} /> : null
+                }
 
               </form>
             </div>
